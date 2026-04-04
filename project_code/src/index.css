@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-stone-50 text-stone-800;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  .maori-text {
+    @apply font-semibold tracking-wide;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+  }
+
+  .btn-primary {
+    @apply bg-pounamu-700 hover:bg-pounamu-800 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-pounamu-500 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold py-2 px-4 rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2;
+  }
+
+  .tag-verb-particle {
+    @apply bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-sm font-medium;
+  }
+
+  .tag-verb {
+    @apply bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded text-sm font-medium;
+  }
+
+  .tag-subject {
+    @apply bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded text-sm font-medium;
+  }
+
+  .tag-location {
+    @apply bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded text-sm font-medium;
+  }
+
+  .tag-time {
+    @apply bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded text-sm font-medium;
+  }
+
+  .tag-object {
+    @apply bg-pink-100 text-pink-800 px-1.5 py-0.5 rounded text-sm font-medium;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-stone-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-stone-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-stone-400;
+}
