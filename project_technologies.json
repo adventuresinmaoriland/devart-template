@@ -1,16 +1,26 @@
 {
     "technologies": {
         "apis": [
-            "insert apis"
+            "Web Storage API (localStorage)"
         ],
         "platforms": [
-            "insert platforms"
+            "Web Browser",
+            "Node.js (build)"
         ],
         "toolkits": [
-            "insert toolkits"
+            "React 18",
+            "TypeScript",
+            "Vite",
+            "Tailwind CSS",
+            "SM-2 Spaced Repetition Algorithm"
         ]
     },
     "themes": [
-        "insert themes"
+        "Education",
+        "Language Learning",
+        "Indigenous Language Revitalisation",
+        "Accessibility",
+        "Cultural Heritage",
+        "Workplace Productivity"
     ]
 }
