@@ -1,36 +1,62 @@
 import { useState } from 'react';
 import { conversations, Conversation, DialogueLine } from '../data/conversations';
 
-function SpeakerBubble({ line, expanded }: { line: DialogueLine; expanded: boolean }) {
+const SPEAKER_STYLES = {
+  A: { bubble: 'bg-pounamu-50 border-pounamu-200 rounded-tl-sm', text: 'text-pounamu-900', avatar: 'bg-pounamu-700' },
+  B: { bubble: 'bg-earth-50 border-earth-200 rounded-tr-sm', text: 'text-earth-900', avatar: 'bg-earth-500' },
+};
+
+function PracticeLine({ line, resetKey }: { line: DialogueLine; resetKey: number }) {
+  const [revealed, setRevealed] = useState(false);
   const isA = line.speaker === 'A';
+  const style = SPEAKER_STYLES[line.speaker];
+
+  // Reset state whenever resetKey changes (parent toggles practice mode)
+  if (resetKey && revealed && false) { /* intentional no-op to capture dep */ }
+
   return (
     <div className={`flex gap-3 ${isA ? '' : 'flex-row-reverse'}`}>
-      <div
-        className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-          isA ? 'bg-pounamu-700 text-white' : 'bg-earth-500 text-white'
-        }`}
-      >
+      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${style.avatar} text-white`}>
         {line.speaker}
       </div>
       <div className={`max-w-[80%] ${isA ? '' : 'items-end'} flex flex-col gap-1`}>
-        {/* Māori */}
-        <div
-          className={`rounded-2xl px-4 py-3 shadow-sm ${
-            isA
-              ? 'bg-pounamu-50 border border-pounamu-200 rounded-tl-sm'
-              : 'bg-earth-50 border border-earth-200 rounded-tr-sm'
-          }`}
-        >
-          <p className={`font-maori font-semibold text-base leading-snug ${isA ? 'text-pounamu-900' : 'text-earth-900'}`}>
-            {line.maori}
-          </p>
+        <div className={`rounded-2xl px-4 py-3 shadow-sm border ${style.bubble}`}>
+          {revealed ? (
+            <p className={`font-maori font-semibold text-base leading-snug ${style.text}`}>{line.maori}</p>
+          ) : (
+            <button
+              onClick={() => setRevealed(true)}
+              className="flex items-center gap-2 text-stone-400 hover:text-stone-600 transition-colors group"
+            >
+              <span className="text-sm italic">Tap to reveal te reo...</span>
+              <span className="text-xs bg-stone-200 group-hover:bg-pounamu-200 px-2 py-0.5 rounded-full transition-colors">👁</span>
+            </button>
+          )}
         </div>
-        {/* English */}
-        <div className={`px-4 py-2 ${isA ? '' : 'text-right'}`}>
+        <div className={`px-4 py-1 ${isA ? '' : 'text-right'}`}>
           <p className="text-stone-500 text-sm italic">{line.english}</p>
         </div>
-        {/* Grammar note */}
-        {expanded && line.notes && (
+      </div>
+    </div>
+  );
+}
+
+function SpeakerBubble({ line, showNotes }: { line: DialogueLine; showNotes: boolean }) {
+  const isA = line.speaker === 'A';
+  const style = SPEAKER_STYLES[line.speaker];
+  return (
+    <div className={`flex gap-3 ${isA ? '' : 'flex-row-reverse'}`}>
+      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${style.avatar} text-white`}>
+        {line.speaker}
+      </div>
+      <div className={`max-w-[80%] ${isA ? '' : 'items-end'} flex flex-col gap-1`}>
+        <div className={`rounded-2xl px-4 py-3 shadow-sm border ${style.bubble}`}>
+          <p className={`font-maori font-semibold text-base leading-snug ${style.text}`}>{line.maori}</p>
+        </div>
+        <div className={`px-4 py-1 ${isA ? '' : 'text-right'}`}>
+          <p className="text-stone-500 text-sm italic">{line.english}</p>
+        </div>
+        {showNotes && line.notes && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800">
             {line.notes}
           </div>
@@ -44,53 +70,78 @@ function ConversationView({ conv }: { conv: Conversation }) {
   const [showNotes, setShowNotes] = useState(false);
   const [showGrammar, setShowGrammar] = useState(false);
   const [showVocab, setShowVocab] = useState(false);
+  const [practiceMode, setPracticeMode] = useState(false);
+  const [practiceKey, setPracticeKey] = useState(0);
+
+  const togglePractice = () => {
+    setPracticeMode((m) => !m);
+    setPracticeKey((k) => k + 1);
+  };
 
   return (
     <div>
-      {/* Scenario info */}
-      <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 mb-6">
-        <p className="text-sm font-semibold text-stone-700 mb-1">Scenario</p>
+      <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 mb-5">
+        <p className="text-sm font-semibold text-stone-700 mb-1">Horopaki — Scenario</p>
         <p className="text-stone-600 text-sm">{conv.scenario}</p>
         <p className="text-stone-400 text-xs mt-1">📍 {conv.setting}</p>
       </div>
 
-      {/* Controls */}
       <div className="flex gap-2 flex-wrap mb-6">
         <button
-          onClick={() => setShowNotes(!showNotes)}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            showNotes ? 'bg-amber-500 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+          onClick={togglePractice}
+          className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+            practiceMode ? 'bg-pounamu-700 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
           }`}
         >
-          {showNotes ? 'Hide' : 'Show'} line notes
+          {practiceMode ? '👁 Revealing' : '🙈 Practice'}
         </button>
-        <button
-          onClick={() => setShowGrammar(!showGrammar)}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            showGrammar ? 'bg-blue-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-          }`}
-        >
-          {showGrammar ? 'Hide' : 'Show'} grammar notes
-        </button>
-        <button
-          onClick={() => setShowVocab(!showVocab)}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            showVocab ? 'bg-pounamu-700 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-          }`}
-        >
-          {showVocab ? 'Hide' : 'Show'} vocabulary
-        </button>
+        {!practiceMode && (
+          <>
+            <button
+              onClick={() => setShowNotes(!showNotes)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                showNotes ? 'bg-amber-500 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+              }`}
+            >
+              {showNotes ? 'Hide' : 'Show'} line notes
+            </button>
+            <button
+              onClick={() => setShowGrammar(!showGrammar)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                showGrammar ? 'bg-blue-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+              }`}
+            >
+              {showGrammar ? 'Hide' : 'Show'} grammar
+            </button>
+            <button
+              onClick={() => setShowVocab(!showVocab)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                showVocab ? 'bg-earth-500 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+              }`}
+            >
+              {showVocab ? 'Hide' : 'Show'} kuputaka
+            </button>
+          </>
+        )}
       </div>
 
-      {/* Dialogue */}
+      {practiceMode && (
+        <div className="bg-pounamu-50 border border-pounamu-200 rounded-xl px-4 py-3 mb-5 text-sm text-pounamu-800">
+          <strong>Practice mode:</strong> English is shown. Try to say the Māori before tapping to reveal each line.
+        </div>
+      )}
+
       <div className="space-y-4 mb-8">
-        {conv.dialogue.map((line, i) => (
-          <SpeakerBubble key={i} line={line} expanded={showNotes} />
-        ))}
+        {conv.dialogue.map((line, i) =>
+          practiceMode ? (
+            <PracticeLine key={`${practiceKey}-${i}`} line={line} resetKey={practiceKey} />
+          ) : (
+            <SpeakerBubble key={i} line={line} showNotes={showNotes} />
+          )
+        )}
       </div>
 
-      {/* Grammar notes */}
-      {showGrammar && (
+      {!practiceMode && showGrammar && (
         <div className="border-t border-stone-200 pt-6 mb-6">
           <h4 className="text-base font-bold text-stone-700 mb-4">Grammar Notes</h4>
           <div className="space-y-3">
@@ -110,10 +161,9 @@ function ConversationView({ conv }: { conv: Conversation }) {
         </div>
       )}
 
-      {/* Vocabulary */}
-      {showVocab && (
+      {!practiceMode && showVocab && (
         <div className="border-t border-stone-200 pt-6">
-          <h4 className="text-base font-bold text-stone-700 mb-4">Key Vocabulary</h4>
+          <h4 className="text-base font-bold text-stone-700 mb-4">Kuputaka — Key Vocabulary</h4>
           <div className="grid sm:grid-cols-2 gap-2">
             {conv.vocabulary.map((word, i) => (
               <div key={i} className="bg-pounamu-50 border border-pounamu-200 rounded-lg px-4 py-2.5 flex justify-between items-center">
@@ -133,13 +183,11 @@ export function DailyConversations() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      {/* Header */}
       <div className="mb-8">
         <h2 className="text-3xl font-bold font-maori text-pounamu-900 mb-1">Kōrero O Ia Rā</h2>
         <p className="text-stone-500">Daily Talk — university workplace conversations</p>
       </div>
 
-      {/* Conversation selector */}
       <div className="grid sm:grid-cols-2 gap-3 mb-8">
         {conversations.map((conv, i) => (
           <button
@@ -157,16 +205,14 @@ export function DailyConversations() {
         ))}
       </div>
 
-      {/* Active conversation */}
       <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
         <div className="mb-6">
           <h3 className="text-xl font-bold font-maori text-pounamu-900">{conversations[selectedConv].title}</h3>
           <p className="text-stone-400 text-sm mt-0.5">{conversations[selectedConv].titleEnglish}</p>
         </div>
-        <ConversationView conv={conversations[selectedConv]} />
+        <ConversationView key={selectedConv} conv={conversations[selectedConv]} />
       </div>
 
-      {/* Speaker key */}
       <div className="flex gap-4 mt-4 text-sm text-stone-500 justify-center">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-pounamu-700 text-white flex items-center justify-center text-xs font-bold">A</div>
